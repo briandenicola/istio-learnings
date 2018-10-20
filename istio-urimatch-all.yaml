@@ -6,8 +6,7 @@ metadata:
     app: whatosistio
 spec:
   ports:
-  - port: 8080
-    targetPort: 8081
+  - port: 8081
     name: http
   selector:
     app: whatosistio
@@ -31,13 +30,40 @@ spec:
     spec:
       containers:
       - name: whatosistio
-        image: bjd145/whatos:latest 
+        image: bjd145/whatos:1.0 
         resources:
           requests:
             cpu: "100m"
         imagePullPolicy: IfNotPresent #Always
         ports:
-        - containerPort: 5000
+        - containerPort: 8081
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: whatosistio-v2
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: whatosistio
+        version: v1
+    spec:
+      containers:
+      - name: whatosistio
+        image: bjd145/whatos:2.0 
+        resources:
+          requests:
+            cpu: "100m"
+        imagePullPolicy: IfNotPresent #Always
+        ports:
+        - containerPort: 8081
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
@@ -60,9 +86,15 @@ metadata:
   name: whatosistio
 spec:
   hosts:
-  - "os.denicolafamily."
+  - "*"
+  gateways:
+  - whatosistio-gateway
   http:
+  - match:
+    - uri:
+        exact: /api/os
     route:
     - destination:
         host: whatosistio
-        subset: v1
+        port:
+          number: 8081

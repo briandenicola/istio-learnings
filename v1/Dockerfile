@@ -6,5 +6,5 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /main .
 
 FROM scratch
 COPY --from=builder /main ./
-EXPOSE 5000
+EXPOSE 8081
 ENTRYPOINT ["./main" ]

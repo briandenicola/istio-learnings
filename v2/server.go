@@ -12,10 +12,13 @@ import (
 	"github.com/rs/cors"
 )
 
+var version string = "v2"
+
 type OS struct {
 	Time string
-    Host string
+    	Host string
 	OSType string
+	Version string
 }
 
 type newAPIHandler struct { }
@@ -28,7 +31,8 @@ func (eh *newAPIHandler) getOperatingSystemHandler(w http.ResponseWriter, r *htt
 	msg := OS{ 
 		time.Now().Format(time.RFC850), 
 		host, 
-		ostype}
+		ostype,
+		version}	
 
 	json.NewEncoder(w).Encode(msg)
 }
