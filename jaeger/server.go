@@ -51,7 +51,7 @@ func main() {
 
 	r := mux.NewRouter()
 	apirouter := r.PathPrefix("/api").Subrouter()
-	apirouter.Methods("GET").Path("/jaegar").HandlerFunc(handler.getOperatingSystemHandler)
+	apirouter.Methods("GET").Path("/jaeger").HandlerFunc(handler.getOperatingSystemHandler)
 	apirouter.Methods("OPTIONS").Path("/jaeger").HandlerFunc(handler.optionsHandler)
 
 	server := cors.Default().Handler(r)
