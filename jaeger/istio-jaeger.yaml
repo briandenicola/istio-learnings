@@ -1,0 +1,81 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: jaegerexample
+  name: jaegerexample
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: jaegerexample
+    spec:
+      containers:
+      - image: bjd145/whatos-jaeger:1.2
+        imagePullPolicy: Always
+        name: jaegerexample
+        ports:
+        - containerPort: 8081
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jaegerexample
+  labels:
+    app: jaegerexample
+spec:
+  type: NodePort
+  ports:
+  - port: 8081
+    targetPort: 8081
+    name: http
+  selector:
+    app: jaegerexample
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: whatosistio-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+       number: 443
+       name: https
+       protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
+      privateKey: /etc/istio/ingressgateway-certs/tls.key
+    hosts:
+     - "whatos.denicolafamily.com"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: whatosistio
+spec:
+  hosts:
+  - "whatos.denicolafamily.com"
+  gateways:
+  - whatosistio-gateway
+  http:
+  - match:
+    - uri:
+        exact: /api/os
+    route:
+    - destination:
+        host: whatosistio
+        port:
+          number: 8081
+  - match:
+    - uri:
+        exact: /api/jaeger
+    route:
+    - destination:
+        host: jaegerexample
+        port:
+          number: 8081
