@@ -1,3 +1,4 @@
 #!/bin/bash
 
-kubectl apply -f <(istioctl kube-inject -f $1)
+namespace=whatosapi
+kubectl -n $namespace apply -f <(istioctl kube-inject -f $1)
