@@ -1,0 +1,110 @@
+deployment: Deploy
+displayName: Istio - Canary Rollout
+stages: 
+- name: Deploy and Allow 1% Traffic
+  pool:
+  - vmImage: Hosted Ubuntu 1604
+  jobs: 
+  - type: Agent
+    steps:
+    - task: tsuyoshiushio.k8s-endpoint.downloader-task.downloader@1
+      displayName: 'Download istioctl'
+      inputs:
+        k8sService: AKS
+        IstioVersion: 1.1.6
+
+    - task: tsuyoshiushio.k8s-endpoint.istio-task.istio@1
+      displayName: 'Code Deploy'
+      inputs:
+        subCommand: ' kube-inject'
+        arguments: '-f _bjd145_istio-examples/deploy/istio-codedeploy.yaml | kubectl -n whatosapi apply -f -'
+
+    - task: Kubernetes@1
+      displayName: 'Istio Configuration'
+      inputs:
+        kubernetesServiceEndpoint: AKS
+        namespace: whatosapi
+        command: apply
+        useConfigurationFile: true
+        configuration: '$(System.DefaultWorkingDirectory)/_bjd145_istio-examples/deploy/istio-canary-release-1percent.yaml'
+
+  - type: Agentless
+    steps:
+    - task: ManualIntervention@8
+      displayName: 'Manual Intervention'
+        
+  - type: Agent
+    steps:
+    - task: Kubernetes@1
+      displayName: 'kubectl rollback'
+      runThisJob: 'Only when a previous job has failed'
+      inputs:
+        kubernetesServiceEndpoint: AKS
+        namespace: whatosapi
+        command: apply
+        useConfigurationFile: true
+        configuration: '$(System.DefaultWorkingDirectory)/_bjd145_istio-examples/deploy/istio-canary-release-rollback.yaml'
+
+- name: Deploy and Allow 10% Traffic
+  pool:
+    vmImage: Hosted Ubuntu 1604
+  jobs:
+  - type: Agent
+    steps:
+    - task: Kubernetes@1
+      displayName: 'Update Istio Configuration'
+      inputs:
+        kubernetesServiceEndpoint: AKS
+        namespace: whatosapi
+        command: apply
+        useConfigurationFile: true
+        configuration: '$(System.DefaultWorkingDirectory)/_bjd145_istio-examples/deploy/istio-canary-release-10percent.yaml'
+        
+  - type: Agentless
+    steps:
+    - task: ManualIntervention@8
+      displayName: 'Manual Intervention'
+            
+  - type: Agent
+    steps:
+    - task: Kubernetes@1
+      displayName: 'kubectl rollback'
+      runThisJob: 'Only when a previous job has failed'
+      inputs:
+        kubernetesServiceEndpoint: AKS
+        namespace: whatosapi
+        command: apply
+        useConfigurationFile: true
+        configuration: '$(System.DefaultWorkingDirectory)/_bjd145_istio-examples/deploy/istio-canary-release-rollback.yaml'
+
+- name: Deploy and Allow 90% Traffic
+  pool:
+      vmImage: Hosted Ubuntu 1604
+  jobs: 
+    - type: Agent
+      steps:
+      - task: Kubernetes@1
+        displayName: 'Update Istio Configuration'
+        inputs:
+          kubernetesServiceEndpoint: AKS
+          namespace: whatosapi
+          command: apply
+          useConfigurationFile: true
+          configuration: '$(System.DefaultWorkingDirectory)/_bjd145_istio-examples/deploy/istio-canary-release-90percent.yaml'
+    
+    - type: Agentless
+      steps:
+      - task: ManualIntervention@8
+        displayName: 'Manual Intervention'
+        
+    - type: Agent
+      steps:
+      - task: Kubernetes@1
+        displayName: 'kubectl rollback'
+        runThisJob: 'Only when a previous job has failed'
+        inputs:
+          kubernetesServiceEndpoint: AKS
+          namespace: whatosapi
+          command: apply
+          useConfigurationFile: true
+          configuration: '$(System.DefaultWorkingDirectory)/_bjd145_istio-examples/deploy/istio-canary-release-rollback.yaml'
