@@ -17,7 +17,15 @@ spec:
         name: jaegerexample
         ports:
         - containerPort: 8081
+        resources:
+          limits:
+            cpu: "2"
+            memory: 2048Mi
+          requests:
+            cpu: "1"
+            memory: 1024Mi
       restartPolicy: Always
+
 ---
 apiVersion: v1
 kind: Service
