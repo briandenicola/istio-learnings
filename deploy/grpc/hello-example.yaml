@@ -11,12 +11,11 @@ kind: Service
 metadata:
   name: hello-service
   namespace: hellogrpc
-  labels:
-    app: hellogreeter
 spec:
   ports:
   - port: 5001
-    name: grpc
+    targetPort: 5001
+    protocol: TCP
   type: ClusterIP 
   selector:
     app: hellogreeter
@@ -89,11 +88,11 @@ spec:
     istio: ingressgateway
   servers:
   - port:
-      number: 8443
-      name: http2
-      protocol: HTTP2
+      number: 443
+      name: tls
+      protocol: TLS
     tls:
-      mode: PASSTHROUGH
+      mode: SIMPLE
       credentialName: istio-ingress-tls
     hosts:
     - "*.bjdcsa.cloud"
@@ -105,12 +104,12 @@ metadata:
   namespace: hellogrpc
 spec:
   hosts:
-  - api.bjdcsa.cloud"
+  - api.bjdcsa.cloud
   gateways:
   - istio-gateway/grpcs-gateway
-  http:
+  tls:
   - route:
     - destination:
-        host: hello-service
+        host: hello-service.hellogrpc.svc.cluster.local
         port:
           number: 5001
