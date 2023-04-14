@@ -12,19 +12,19 @@ task up
 ### Version 1
 ```bash
 cd code/v1
-docker build -t whatos:1.0 . 
+docker build -t bjd145/whatos:1.0 . 
 ```
 
 ### Version 2
 ```bash
 * cd code/v2
-* docker build -t whatos:2.0 . 
+* docker build -t bjd145/whatos:2.0 . 
 ```
 
 ### Jaeger
 ```bash
 * cd code/jaegar
-* docker build -t whatos-jaeger:3.0 .
+* docker build -t bjd145/whatos-jaeger:3.0 .
 ```
 
 ## Deploy Examples
@@ -39,7 +39,7 @@ docker build -t whatos:1.0 .
 # Secure gRPC Examples
 ## Setup Infrastructure 
 ```bash
-    cd ./infrastructure 
-    task up 
+cd ./infrastructure 
+task up 
 ```
 
