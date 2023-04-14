@@ -1,8 +1,7 @@
 # Overview
-This Repo contains code for a simple REST API to help me learn Kubernetes and istio. 
-This REST API will just returns a simple JSON object with the OS that the container is running on and a version number.
+This repo contains code for my Istio learnings
 
-# To Build
+# Canary Release Examples
 ## Version 1
 * cd code/v1
 * docker build -t whatos:1.0 . 
@@ -14,11 +13,11 @@ This REST API will just returns a simple JSON object with the OS that the contai
 ## Jaeger Version 
 * cd code/jaegar
 * docker build -t whatos-jaeger:3.0 .
-
-
 # Config Examples
-* deploy/simple-ingress.yaml - A simple Kubernetes Ingress Controller using nginx
-* deploy/istio-jaeger.yaml - Deploys the Jaegar example container for distributive tracing
-* deploy/istio-urimatch-all.yaml - A simple example with an istio Virtual Service
-* deploy/istio-ssl.yaml - An example with an Istio Virtual Service using using TLS
-* deploy/istio-weightedrules.yaml - An example with Isitio distributing load to two different versions of a container
+* deploy/istio-codedeploy.yaml - A basic deployment example 
+* deploy/istio-ssl.yaml - An basic deployment example with an TLS protected Istio Virtual Service
+* deploy/istio-canary-release-*percent.yaml - An example Canary release utilizaing Istio Virtual Service weighted routing
+* deploy/istio-jaeger.yaml - An example using Istio with Jaeger for Distributive Tracing via Open Telemetry
+
+# Secure gRPC Examples
+
