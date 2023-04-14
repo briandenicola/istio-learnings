@@ -11,26 +11,34 @@ task up
 ## Build
 ### Version 1
 ```bash
-cd code/v1
+cd code/canary/v1
 docker build -t bjd145/whatos:1.0 . 
 ```
 
 ### Version 2
 ```bash
-* cd code/v2
+* cd code/canary/v2
 * docker build -t bjd145/whatos:2.0 . 
 ```
 
-### Jaeger
-```bash
-* cd code/jaegar
-* docker build -t bjd145/whatos-jaeger:3.0 .
-```
-
-## Deploy Examples
+## Deploy
 * deploy/istio-codedeploy.yaml - A basic deployment example 
 * deploy/istio-ssl.yaml - An basic deployment example with an TLS protected Istio Virtual Service
 * deploy/istio-canary-release-*percent.yaml - An example Canary release utilizaing Istio Virtual Service weighted routing
+
+# Tracing Example
+## Setup Infrastructure 
+```bash
+cd ./infrastructure 
+task up 
+```
+## Code Build
+```bash
+* cd code/tracing
+* docker build -t bjd145/whatos-jaeger:3.0 .
+```
+
+## Deploy
 * deploy/istio-jaeger.yaml - An example using Istio with Jaeger for Distributive Tracing via Open Telemetry
 
 ## Test
