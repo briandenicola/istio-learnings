@@ -13,12 +13,14 @@ task up
 ```bash
 cd code/canary/v1
 docker build -t bjd145/whatos:1.0 . 
+docker push bjd145/whatos:1.0 
 ```
 
 ### Version 2
 ```bash
-* cd code/canary/v2
-* docker build -t bjd145/whatos:2.0 . 
+cd code/canary/v2
+docker build -t bjd145/whatos:2.0 . 
+docker push bjd145/whatos:2.0 
 ```
 
 ## Deploy
@@ -34,8 +36,9 @@ task up
 ```
 ## Code Build
 ```bash
-* cd code/tracing
-* docker build -t bjd145/whatos-jaeger:3.0 .
+cd code/tracing
+docker build -t bjd145/whatos-jaeger:3.0 .
+docker push bjd145/whatos-jaeger:3.0
 ```
 
 ## Deploy
@@ -50,4 +53,12 @@ task up
 cd ./infrastructure 
 task up 
 ```
+## Code Build
+```bash
+cd code/tracing
+docker build -t bjd145/hello-service:3352bdfde61d . 
+docker push bjd145/hello-service:3352bdfde61d
+```
+
+## Deploy
 
