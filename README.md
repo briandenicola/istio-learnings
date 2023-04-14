@@ -61,4 +61,10 @@ docker push bjd145/hello-service:3352bdfde61d
 ```
 
 ## Deploy
+```bash 
+bash ./scripts/create-tls-secret.sh -n hellogrpc -c ~/example.local.cer -k ~/example.local.key
+kubectl apply -f ./deploy/grpc/hello-example.yaml
+```
+
+## Test
 
