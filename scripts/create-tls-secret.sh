@@ -2,6 +2,10 @@
 
 while (( "$#" )); do
   case "$1" in
+    -s)
+      SECRET_NAME=$2
+      shift 2
+      ;;
     -n)
       NAMESPACE=$2
       shift 2
@@ -15,7 +19,7 @@ while (( "$#" )); do
       shift 2
       ;;
     -h|--help)
-      echo "Usage: ./create-tls-secret.sh -n ${NAMESPACE} -c ${CERT_FILE_PATH} -k ${KEY_FILE_PATH}
+      echo "Usage: ./create-tls-secret.sh -n ${NAMESPACE} -c ${CERT_FILE_PATH} -k ${KEY_FILE_PATH} [-s ${SECRET_NAME}]
       "
       exit 0
       ;;
@@ -30,5 +34,9 @@ while (( "$#" )); do
   esac
 done
 
+if [[ -z "${SECRET_NAME}" ]]; then
+  SECRET_NAME=hello-service-cert
+fi 
+
 kubectl create ns ${NAMESPACE} || true
-kubectl --namespace ${NAMESPACE} create secret tls hello-service-cert --cert=${CERT_FILE_PATH} --key=${KEY_FILE_PATH}
+kubectl --namespace ${NAMESPACE} create secret tls ${SECRET_NAME} --cert=${CERT_FILE_PATH} --key=${KEY_FILE_PATH}
