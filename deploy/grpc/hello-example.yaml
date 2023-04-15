@@ -89,8 +89,8 @@ spec:
   servers:
   - port:
       number: 443
-      name: tls
-      protocol: TLS
+      name: https
+      protocol: HTTPS
     tls:
       mode: SIMPLE
       credentialName: httpbin-credential
