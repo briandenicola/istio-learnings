@@ -92,8 +92,9 @@ spec:
       name: https
       protocol: HTTPS
     tls:
-      mode: SIMPLE
-      credentialName: httpbin-credential
+      mode: PASSTHROUGH
+      #mode: SIMPLE
+      #credentialName: httpbin-credential
     hosts:
     - "*.bjdcsa.cloud"
 ---
@@ -109,9 +110,10 @@ spec:
   - istio-gateway/grpcs-gateway
   tls:
   - match:
-    - sniHosts:
+    - port: 443
+      sniHosts:
       - api.bjdcsa.cloud
-  - route:
+    route:
     - destination:
         host: hello-service.hellogrpc.svc.cluster.local
         port:
