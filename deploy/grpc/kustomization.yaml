@@ -1,0 +1,7 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- namespace.yaml
+- hello-example-v1.yaml
+- hello-example-v2.yaml
+- gateways.yaml

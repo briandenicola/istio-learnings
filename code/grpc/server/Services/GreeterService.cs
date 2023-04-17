@@ -6,6 +6,8 @@ namespace server.Services;
 public class GreeterService : Greeter.GreeterBase
 {
     private readonly ILogger<GreeterService> _logger;
+    private readonly string _version = System.Environment.GetEnvironmentVariable("HELLO_GRPC_VERSION") ?? "v0";
+
     public GreeterService(ILogger<GreeterService> logger)
     {
         _logger = logger;
@@ -15,7 +17,7 @@ public class GreeterService : Greeter.GreeterBase
     {
         return Task.FromResult(new HelloReply
         {
-            Message = $"[{DateTime.UtcNow}] - Hello {request.Name} from SayHello...."
+            Message = $"[{DateTime.UtcNow}]({_version}) - Hello {request.Name} from SayHello...."
         });
     }
 
@@ -28,7 +30,7 @@ public class GreeterService : Greeter.GreeterBase
         {
             await responseStream.WriteAsync(new HelloReply
             {
-                Message = $"[{DateTime.UtcNow}] - Hello {request.Name} from SayHelloStream....(Sleeping now for 20 seconds)"
+                Message = $"[{DateTime.UtcNow}]({_version}) - Hello {request.Name} from SayHelloStream....(Sleeping now for 20 seconds)"
             });
 
             await Task.Delay(TimeSpan.FromSeconds(waitTime));
