@@ -4,4 +4,4 @@ kind: Namespace
 metadata:
   name: hellogrpc
   labels:
-    istio-injection: enabled
+    istio.io/rev: asm-1-17

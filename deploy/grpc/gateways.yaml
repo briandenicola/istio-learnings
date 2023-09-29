@@ -3,26 +3,25 @@ apiVersion: networking.istio.io/v1beta1
 kind: Gateway
 metadata:
   name: grpcs-gateway
-  namespace: istio-gateway
+  namespace: aks-istio-ingress
 spec:
   selector:
-    istio: ingressgateway
+    istio: aks-istio-ingressgateway-internal  
   servers:
   - port:
-      number: 8443
+      number: 443
       name: https
       protocol: HTTPS
     tls:
-      mode: PASSTHROUGH
-      #mode: SIMPLE
-      #credentialName: httpbin-credential
+      mode: SIMPLE
+      credentialName: grpc-ingress-tls
     hosts:
     - "*.bjdcsa.cloud"
-  - port:
-      number: 8444
-      name: https
-      protocol: HTTPS
-    tls:
-      mode: PASSTHROUGH
-    hosts:
-    - "*.bjdcsa.cloud"
+  # - port:
+  #     number: 443
+  #     name: https
+  #     protocol: HTTPS
+  #   tls:
+  #     mode: PASSTHROUGH
+  #   hosts:
+  #   - "*.bjdcsa.cloud"

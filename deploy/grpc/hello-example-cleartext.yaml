@@ -1,18 +1,3 @@
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: hello-service-v1
-  namespace: hellogrpc
-spec:
-  ports:
-  - port: 5001
-    targetPort: 5001
-    protocol: TCP
-  type: ClusterIP 
-  selector:
-    app: hellogreeter
-    version: v1
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -20,7 +5,7 @@ metadata:
   name: hellogreeter-v1
   namespace: hellogrpc
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: hellogreeter
@@ -46,7 +31,7 @@ spec:
           type: RuntimeDefault
       containers:
       - name: hellogreeter
-        image: bjd145/hello-service:06c93709b308
+        image: bjd145/hello-service:06c93709b30d
         imagePullPolicy: Always
         securityContext:
           runAsNonRoot: true
@@ -56,7 +41,7 @@ spec:
         - name: HELLO_GRPC_VERSION
           value: "v1"
         ports:
-        - containerPort: 5001
+        - containerPort: 5000
         resources:
           limits:
             memory: "512Mi"
@@ -64,18 +49,25 @@ spec:
           requests:
             memory: "64Mi"
             cpu: "0.25"
-        volumeMounts:
-        - mountPath: /app/certs
-          name: tls-volume
       tolerations:
       - key: "reservedFor"
         operator: "Equal"
         value: "apps"
         effect: "NoSchedule"
-      volumes:
-      - name: tls-volume
-        secret:
-          secretName: hello-service-cert
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-service-v1
+  namespace: hellogrpc
+spec:
+  ports:
+  - port: 5000
+    targetPort: 5000
+  type: ClusterIP 
+  selector:
+    app: hellogreeter
+    version: v1
 ---
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
@@ -86,14 +78,10 @@ spec:
   hosts:
   - api-v1.bjdcsa.cloud
   gateways:
-  - istio-gateway/grpcs-gateway
-  tls:
-  - match:
-    - port: 443
-      sniHosts:
-      - api-v1.bjdcsa.cloud
-    route:
+  - aks-istio-ingress/grpcs-gateway
+  http:
+  - route:
     - destination:
-        host: hello-service-v1.hellogrpc.svc.cluster.local
+        host:  hello-service-v1.hellogrpc.svc.cluster.local
         port:
-          number: 5001
+          number: 5000
