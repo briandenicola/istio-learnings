@@ -64,6 +64,8 @@ spec:
   ports:
   - port: 5000
     targetPort: 5000
+    name: grpc 
+    protocol: TCP
   type: ClusterIP 
   selector:
     app: hellogreeter
