@@ -1,15 +1,13 @@
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS builder
+FROM golang:1.19 as builder
 
-WORKDIR /src/
+WORKDIR /src
+ENV GO111MODULE=on
 COPY . .
-RUN dotnet restore 
-RUN dotnet publish -c Release --nologo -o publish/linux
+RUN go mod tidy
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /main .
 
-#Build runtime image
-FROM mcr.microsoft.com/dotnet/runtime-deps:7.0
-
-WORKDIR /app
-COPY --from=builder /src/publish/linux/hello-service .
-COPY appsettings.json .
-EXPOSE 5000
-ENTRYPOINT ["/app/hello-service"]
+FROM scratch
+COPY --from=busybox:1.28 /bin/busybox /bin/busybox
+COPY --from=builder /main ./
+EXPOSE 8080
+ENTRYPOINT ["./main" ]
