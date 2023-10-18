@@ -1,18 +1,44 @@
 
 apiVersion: v1
-kind: Service
+kind: ServiceAccount
 metadata:
-  name: hello-service-v2
+  name: hellogreeter-sa-identity
+  namespace: hellogrpc
+  annotations:
+    azure.workload.identity/client-id: 71e83a92-8a66-44f4-bf3a-92d5b58f5506
+    azure.workload.identity/tenant-id: 16b3c013-d300-468d-ac64-7eda0820b6d3
+  labels:
+    azure.workload.identity/use: "true"
+---
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: hello-service-cert
   namespace: hellogrpc
 spec:
-  ports:
-  - port: 5001
-    targetPort: 5001
-    protocol: TCP
-  type: ClusterIP 
-  selector:
-    app: hellogreeter
-    version: v2
+  provider: azure
+  secretObjects:                               
+  - secretName: hello-service-cert
+    type: kubernetes.io/tls
+    data: 
+    - objectName: tls
+      key: tls.key
+    - objectName: tls
+      key: tls.crt
+  parameters:
+    usePodIdentity: "false"
+    useVMManagedIdentity: "false"
+    keyvaultName: hawk-47407-kv
+    clientID: 71e83a92-8a66-44f4-bf3a-92d5b58f5506
+    cloudName: ""                                         
+    objects:  |
+      array:
+        - |
+          objectName: grpc-wildcard-certificate
+          objectAlias: tls
+          objectType: secret
+          objectVersion: ""               # [OPTIONAL] object versions, default to latest if empty
+    tenantId: 16b3c013-d300-468d-ac64-7eda0820b6d3
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -20,7 +46,7 @@ metadata:
   name: hellogreeter-v2
   namespace: hellogrpc
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: hellogreeter
@@ -37,6 +63,7 @@ spec:
         app: hellogreeter
         version: v2
     spec:
+      serviceAccountName: hellogreeter-sa-identity
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000  
@@ -46,7 +73,7 @@ spec:
           type: RuntimeDefault
       containers:
       - name: hellogreeter
-        image: bjd145/hello-service:06c93709b308
+        image: bjd145/hello-service:06c93709b309
         imagePullPolicy: Always
         securityContext:
           runAsNonRoot: true
@@ -55,8 +82,6 @@ spec:
         env:
         - name: HELLO_GRPC_VERSION
           value: "v2"
-        ports:
-        - containerPort: 5001
         resources:
           limits:
             memory: "512Mi"
@@ -74,8 +99,28 @@ spec:
         effect: "NoSchedule"
       volumes:
       - name: tls-volume
-        secret:
-          secretName: hello-service-cert
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "hello-service-cert"
+        #secret:
+        #  secretName: hello-service-cert
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-service-v2
+  namespace: hellogrpc
+spec:
+  ports:
+  - port: 5003
+    targetPort: 5003
+    protocol: TCP
+  type: ClusterIP 
+  selector:
+    app: hellogreeter
+    version: v2
 ---
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
@@ -86,7 +131,7 @@ spec:
   hosts:
   - api-v2.bjdcsa.cloud
   gateways:
-  - istio-gateway/grpcs-gateway
+  - aks-istio-ingress/grpcs-gateway
   tls:
   - match:
     - port: 443
@@ -96,4 +141,4 @@ spec:
     - destination:
         host: hello-service-v2.hellogrpc.svc.cluster.local
         port:
-          number: 5001
+          number: 5003

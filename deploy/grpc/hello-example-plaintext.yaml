@@ -49,11 +49,11 @@ spec:
           requests:
             memory: "64Mi"
             cpu: "0.25"
-      # tolerations:
-      # - key: "reservedFor"
-      #   operator: "Equal"
-      #   value: "apps"
-      #   effect: "NoSchedule"
+      tolerations:
+       - key: "reservedFor"
+         operator: "Equal"
+         value: "apps"
+         effect: "NoSchedule"
 ---
 apiVersion: v1
 kind: Service

@@ -1,12 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: default-backend
+  name: default-grpc-backend
   namespace: aks-istio-ingress
 spec:
   selector:
     matchLabels:
-      app: default-ingress-backend
+      app: default-grpc-backend
   replicas: 1
   strategy:
     type: RollingUpdate
@@ -17,7 +17,7 @@ spec:
   template:
     metadata:
       labels:
-        app: default-ingress-backend
+        app: default-grpc-backend
     spec:
       serviceAccountName: istio-ingress-sa-identity
       containers:
@@ -47,11 +47,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: default-backend-svc
+  name: default-grpc-svc
   namespace: aks-istio-ingress
 spec:
   selector:
-    app: default-ingress-backend
+    app: default-grpc-backend
   ports:
   - port: 80
     targetPort: 80
