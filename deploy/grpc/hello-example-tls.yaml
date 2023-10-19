@@ -78,7 +78,9 @@ spec:
         securityContext:
           runAsNonRoot: true
           readOnlyRootFilesystem: false
-          allowPrivilegeEscalation: false  
+          allowPrivilegeEscalation: false 
+        ports:
+        - containerPort: 5003
         env:
         - name: HELLO_GRPC_VERSION
           value: "v2"

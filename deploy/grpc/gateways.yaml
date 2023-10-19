@@ -17,15 +17,15 @@ spec:
       name: https
       protocol: HTTPS
     tls:
+      mode: PASSTHROUGH
+    hosts:
+     - "api-v2.bjdcsa.cloud"
+  - port:
+      number: 443
+      name: http2
+      protocol: HTTPS
+    tls:
       mode: SIMPLE
       credentialName: grpc-ingress-tls
     hosts:
-    - "*.bjdcsa.cloud"
-  - port:
-      number: 444
-      name: https
-      protocol: HTTPS
-    tls:
-      mode: PASSTHROUGH
-    hosts:
-    - "*.bjdcsa.cloud"
+    - "api-v1.bjdcsa.cloud"
