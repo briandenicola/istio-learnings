@@ -101,6 +101,7 @@ tasks:
     desc: Installs the Istio Bookinfo Sample Application (1.23)
     dir: deploy/bookinfo
     cmds:
+    - kubectl label namespace default istio.io/dataplane-mode=ambient
     - kubectl apply -f .
 
   down:
