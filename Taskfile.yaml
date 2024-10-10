@@ -64,7 +64,6 @@ tasks:
     - task: istio-base
     - helm upgrade -i istiod istio/istiod -n istio-system --wait
     - task: istio-gateway
-    - task: istio-extras
 
   istio-ambient:
     desc: Installs and deploys a Istio in Ambient mode
@@ -74,7 +73,6 @@ tasks:
     - helm upgrade -i istio-cni istio/cni -n istio-system --set profile=ambient --wait
     - helm upgrade -i ztunnel istio/ztunnel -n istio-system --wait
     - task: istio-gateway
-    - task: istio-extras
 
   istio-base:
     internal: true
