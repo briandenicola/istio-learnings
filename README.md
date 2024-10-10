@@ -4,7 +4,8 @@ This repo contains code for my Istio learnings
 # Canary Release Examples
 ## Setup Infrastructure 
 ```bash
-task up 
+task up
+task istio-basic
 ```
 
 ## Build
@@ -25,12 +26,14 @@ docker push bjd145/whatos:2.0
 ## Deploy
 * deploy/istio-codedeploy.yaml - A basic deployment example 
 * deploy/istio-ssl.yaml - An basic deployment example with an TLS protected Istio Virtual Service
+    * Run ./scripts/create-tls-secret.sh  to generate a self-signed certificate and key for the Istio Virtual Service
 * deploy/istio-canary-release-*percent.yaml - An example Canary release utilizaing Istio Virtual Service weighted routing
 
 # Tracing Example
 ## Setup Infrastructure 
 ```bash
 task up 
+task istio-basic
 ```
 ## Code Build
 ```bash
@@ -48,7 +51,8 @@ docker push bjd145/whatos-jaeger:3.0
 # Secure gRPC Examples
 ## Setup Infrastructure 
 ```bash
-task up 
+task up
+task istio-basic
 ```
 ## Code Build
 ```bash
@@ -63,6 +67,3 @@ bash ./scripts/create-tls-secret.sh -n istio-gateway -c ~/wildcard.local.cer -k 
 bash ./scripts/create-tls-secret.sh -n hellogrpc -c ~/example.local.cer -k ~/example.local.key
 kubectl apply -f ./deploy/grpc/hello-example.yaml
 ```
-
-## Test
-
