@@ -97,6 +97,7 @@ tasks:
     cmds:
     - istioctl waypoint generate --for service -n default 
     - istioctl waypoint apply -n default
+    
   knative:
     desc: Installs Knative
     dir: ./common/knative

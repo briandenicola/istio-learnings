@@ -1,6 +1,14 @@
 # Overview
 This repo contains code for my Istio learnings
 
+# Ambient Mesh 
+>> Note: Requires istioctl version 1.23 or higher
+```bash
+task up
+task istio-ambient #Includes Waypoint proxy for default namespace
+task bookinfo
+```
+
 # Canary Release Examples
 ## Setup Infrastructure 
 ```bash
@@ -23,18 +31,30 @@ docker build -t bjd145/whatos:2.0 .
 docker push bjd145/whatos:2.0 
 ```
 
-## Deploy
-* deploy/istio-codedeploy.yaml - A basic deployment example 
-* deploy/istio-ssl.yaml - An basic deployment example with an TLS protected Istio Virtual Service
-    * Run ./scripts/create-tls-secret.sh  to generate a self-signed certificate and key for the Istio Virtual Service
-* deploy/istio-canary-release-*percent.yaml - An example Canary release utilizaing Istio Virtual Service weighted routing
+## Deploy Basic Example
+```bash
+kubectl apply -f ./deploy/istio-codedeploy.yaml 
+```
+## Deploy TLS Ingress Example
+```
+bash ./scripts/create-tls-secret.sh  
+kubectl apply -f ./deploy/istio-ssl.yaml
+```
 
-# Tracing Example
+## Deploy Canary Release Example
+```bash
+kubectl apply -f ./deploy/istio-canary-release-1percent.yaml 
+kubectl apply -f ./deploy/istio-canary-release-10percent.yaml 
+kubectl apply -f ./deploy/istio-canary-release-90percent.yaml 
+```
+
+# Tracing Example with OTEL
 ## Setup Infrastructure 
 ```bash
 task up 
 task istio-basic
 ```
+
 ## Code Build
 ```bash
 cd code/tracing
@@ -43,10 +63,13 @@ docker push bjd145/whatos-jaeger:3.0
 ```
 
 ## Deploy
-* deploy/istio-jaeger.yaml - An example using Istio with Jaeger for Distributive Tracing via Open Telemetry
+```bash
+kubectl apply -f ./deploy/istio-jaeger.yaml
 
 ## Test
-* ./scripts/test.sh
+```bash
+bash ./scripts/test.sh
+```
 
 # Secure gRPC Examples
 ## Setup Infrastructure 
