@@ -1,0 +1,108 @@
+version: '3'
+
+vars:
+  SKU: "Standard_B4ls_v2"
+  DEFAULT_COUNT: 3
+  DEFAULT_TAG: "Basic AKS Cluster to learn Istio"
+  DEFAULT_REGION: "canadacentral"
+  DEPLOY_PROMETHEUS: true
+  
+tasks:
+  default:
+    desc: Calls `task --list` 
+    cmds:
+    - task --list
+
+  up:
+    desc: Creates a {{.TAGS}}
+    dir: ./infrastructure
+    cmds:
+    - terraform workspace new {{.REGION}} || true
+    - terraform workspace select {{.REGION}}
+    - terraform init
+    - task: apply
+      vars:
+        REGION: '{{.REGION}}'
+        TAGS: '{{.TAG_FOR_RUN}}'
+        NODE_COUNT: '{{default .DEFAULT_COUNT .COUNT }}'
+    - task: creds
+    vars: 
+      REGION: '{{default .DEFAULT_REGION (split " " .CLI_ARGS)._0}}'
+      TAG_FOR_RUN: '{{default .DEFAULT_TAG .TAGS }}'
+      NODE_COUNT: '{{default .DEFAULT_COUNT .COUNT }}'
+      
+  apply:
+    desc: Applies the Terraform templates
+    dir: ./infrastructure
+    cmds:
+    - terraform apply -auto-approve -compact-warnings
+        -var "region={{.REGION}}" 
+        -var "vm_size={{.SKU}}"
+        -var "node_count={{.NODE_COUNT}}" 
+        -var "tags={{.TAG_FOR_RUN}}" 
+        -var "enable_managed_offerings={{.DEPLOY_PROMETHEUS}}" 
+    vars: 
+      REGION: '{{default .DEFAULT_REGION (split " " .CLI_ARGS)._0}}'
+      NODE_COUNT: '{{default .DEFAULT_COUNT (split " " .CLI_ARGS)._1 }}'
+      TAG_FOR_RUN: '{{default .DEFAULT_TAG (split " " .CLI_ARGS)._2 }}'
+
+  creds:
+    desc: Gets AKS credential file
+    dir: ./infrastructure
+    cmds:
+    - az aks get-credentials -g {{.RG}} -n {{.AKS}} --overwrite-existing
+    - kubelogin convert-kubeconfig -l azurecli
+    vars:
+      RG: 
+        sh: terraform output -raw AKS_RESOURCE_GROUP
+      AKS: 
+        sh: terraform output -raw AKS_CLUSTER_NAME
+
+  istio-basic:
+    desc: Installs and deploys a basic Istio profile
+    cmds:
+    - task: istio-base
+    - helm upgrade -i istiod istio/istiod -n istio-system --wait
+    - task: istio-gateway
+    - task: istio-extras
+
+  istio-ambient:
+    desc: Installs and deploys a Istio in Ambient mode
+    cmds:
+    - kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.0/standard-install.yaml;
+    - helm upgrade -i istiod istio/istiod --namespace istio-system --set profile=ambient --wait
+    - helm upgrade -i istio-cni istio/cni -n istio-system --set profile=ambient --wait
+    - helm upgrade -i ztunnel istio/ztunnel -n istio-system --wait
+    - task: istio-gateway
+    - task: istio-extras
+
+  istio-base:
+    internal: true
+    cmds:
+    - helm repo add istio https://istio-release.storage.googleapis.com/charts
+    - helm repo update  
+    - kubectl create namespace istio-system || true
+    - kubectl create namespace istio-ingress || true
+    - helm upgrade -i istio-base istio/base -n istio-system --set defaultRevision=default
+
+  istio-gateway: 
+    internal: true
+    dir: ./common/istio/gateway
+    cmds:
+    - helm upgrade -i istio-ingress istio/gateway -n istio-ingress --wait
+    - kubectl apply -k .
+
+  knative:
+    desc: Installs Knative
+    dir: ./common/knative
+    cmds:
+    - kubectl apply -k .
+
+  down:
+    desc: Destroys all Azure resources and cleans up Terraform
+    dir: ./infrastructure
+    cmds:
+    - az group list --tag Application="{{.TAG_FOR_DELETE}}" --query "[].name" -o tsv | xargs -ot -n 1 az group delete -y --verbose --no-wait -n  || true
+    - rm -rf terraform.tfstate.d .terraform.lock.hcl .terraform terraform.tfstate terraform.tfstate.backup .terraform.tfstate.lock.info || true
+    vars:
+      TAG_FOR_DELETE: '{{default .DEFAULT_TAG .TAGS }}'

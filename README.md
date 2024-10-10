@@ -4,7 +4,6 @@ This repo contains code for my Istio learnings
 # Canary Release Examples
 ## Setup Infrastructure 
 ```bash
-cd ./infrastructure 
 task up 
 ```
 
@@ -31,7 +30,6 @@ docker push bjd145/whatos:2.0
 # Tracing Example
 ## Setup Infrastructure 
 ```bash
-cd ./infrastructure 
 task up 
 ```
 ## Code Build
@@ -50,7 +48,6 @@ docker push bjd145/whatos-jaeger:3.0
 # Secure gRPC Examples
 ## Setup Infrastructure 
 ```bash
-cd ./infrastructure 
 task up 
 ```
 ## Code Build
