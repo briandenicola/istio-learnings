@@ -74,7 +74,8 @@ tasks:
     - helm upgrade -i istio-cni istio/cni -n istio-system --set profile=ambient --wait
     - helm upgrade -i ztunnel istio/ztunnel -n istio-system --wait
     - task: istio-gateway
-
+    - task: waypoint-proxy
+    
   istio-base:
     internal: true
     cmds:
@@ -91,6 +92,11 @@ tasks:
     - helm upgrade -i istio-ingress istio/gateway -n istio-ingress --wait
     - kubectl apply -k .
 
+  waypoint-proxy:
+    desc: Installs the Waypoint Proxy (https://istio.io/latest/docs/ambient/usage/waypoint/)
+    cmds:
+    - istioctl waypoint generate --for service -n default 
+    - istioctl waypoint apply -n default
   knative:
     desc: Installs Knative
     dir: ./common/knative
